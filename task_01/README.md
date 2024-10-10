@@ -1,4 +1,4 @@
-## Implement Hello World in Golang, Flask, Node.js, and Spring Boot with Nginx Load Balancer
+## Implement Hello World in Golang, Flask, Node.js, and Spring Boot with Nginx Reverse Proxy
 
 ### 1. Container Management Interface
 
