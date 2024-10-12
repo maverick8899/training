@@ -1,4 +1,4 @@
-## Automate login and scrape enrolled courses 
+## Automate login and scrape enrolled courses on Udemy Academy
 
 This project automates the process of logging into Udemy and scraping the courses that the user is enrolled in. It uses Python with libraries such as `requests` to handle HTTP requests and parse HTML content.
 
