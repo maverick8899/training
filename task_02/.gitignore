@@ -1,0 +1,48 @@
+# Python
+*.py[cod]
+__pycache__/
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Thư mục môi trường ảo
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Thư mục và file cấu hình của IDE
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Thư mục và file log
+*.log
+logs/
+*.log.*
+
+# Các file nhạy cảm
+*.env
+*.secret
+
+# Các file tạm thời
+*.tmp
+*.temp
+*.bak
+
+# Thư mục tải lên
+uploads/
+static/uploads/
+
+# File cache
+*.egg-info/
+dist/
+build/
+__pycache__/
+
+# Thư mục config
+config/
