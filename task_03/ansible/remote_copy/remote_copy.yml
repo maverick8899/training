@@ -1,0 +1,24 @@
+---
+#> ansible-playbook -i inventory.yml remote_copy.yml --extra-vars='@vars.yml' -vv > remote_copy.log
+- name: Remote File Copy Playbook
+  hosts: web_srv_group
+  gather_facts: no
+  vars:
+      log_file: '{{ workspace }}remote_copy_{{ build_number }}.log'
+  tasks:
+      - name: loop hosts
+        debug:
+            msg: 'Copy {{source_file}} to {{ ansible_host }}:{{ hostvars[inventory_hostname].dest_path }}'
+
+      - name: Copy file to remote server
+        copy:
+            src: '{{ source_file }}'
+            dest: '{{ hostvars[inventory_hostname].dest_path }}'
+            owner: '{{ ssh_user }}'
+            group: '{{ ssh_user }}'
+            mode: '0644'
+        register: copy_result
+
+      - name: Copy result
+        debug:
+          msg: "Copy to {{ ansible_host }} {{ 'successful' if copy_result is succeeded else 'failed' }}."

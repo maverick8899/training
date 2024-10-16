@@ -1,0 +1,38 @@
+---
+#> ansible -i inventory.yml -m ping all
+#> ansible -i inventory.yml srv_01 -m ansible.builtin.shell -a nc -zv -w 30 localhost 443
+- name: Auto Ping and Check Ports
+  hosts: local
+  become: true
+  vars:
+      index: 1
+      ip_ports: "{{ ip_ports | default('') }}"
+      log_file: '{{ workspace }}autoping_{{ build_number }}.log'
+  tasks:
+      - name: Check if IP_PORT variable is provided
+        fail:
+            msg: 'IP address is not provided'
+        when: ip_ports == ""
+
+      - name: Remove existing log file
+        file:
+            path: '{{ log_file }}'
+            state: absent
+
+      - name: Create log file
+        file:
+            path: '{{ log_file }}'
+            state: touch
+
+      - name: Convert IP_PORT string to list
+        set_fact:
+            ip_port_list: "{{ ip_ports.split(',') }}"
+
+      - name: Ping IP addresses
+        include_tasks: loop.yml
+        loop: '{{ ip_port_list }}'
+
+      - name: Log completion message
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Server Check Completed ======"

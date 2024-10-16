@@ -1,0 +1,5 @@
+# log_file: "{{ workspace}}/jenkins_server_check.log"
+build_number: 1
+workspace: "./"
+ssh_user: 'vagrant'
+ssh_pass: 1

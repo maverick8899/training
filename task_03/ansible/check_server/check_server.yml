@@ -1,0 +1,151 @@
+---
+- name: Jenkins Server Check
+  hosts: all
+  # gather_facts: no #? disable fact variable
+  become: true
+  vars:
+      log_file: "{{ workspace}}jenkins_server_check.log"
+  tasks:
+      - name: Network information
+        debug:
+            var: ansible_default_ipv4
+
+      - name: Remove existing log file
+        file:
+            path: '{{ log_file }}'
+            state: absent  
+      - name: Create new log file
+        file:
+            path: '{{ log_file }}'
+            state: touch #? create by touch if it's not exist
+
+      - name: Debug log_file
+        debug:
+          msg: "Log file path is: {{ log_file }}"
+
+      - name: Check CPU usage
+        shell: 'top -b -n1 | head -n 3'
+        register: cpu_usage #? lưu trữ kết quả đầu ra của một tác vụ (task) vào một biến
+        ignore_errors: true #? Ignore if error occurs
+      
+      - name: Log CPU usage
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Checking CPU usage ======\n{{ cpu_usage.stdout }}"
+            create: yes
+        when: cpu_usage.stdout is defined
+
+      - name: Check Memory usage
+        command: free -m
+        register: memory_usage
+        ignore_errors: true
+
+      - name: Log Memory usage
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Checking Memory usage ======\n{{ memory_usage.stdout }}"
+            create: yes
+        when: memory_usage.stdout is defined
+
+      - name: Check Disk usage
+        command: df -h
+        register: disk_usage
+        ignore_errors: true
+
+      - name: Log Disk usage
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Checking Disk usage ======\n{{ disk_usage.stdout }}"
+            create: yes
+        when: disk_usage.stdout is defined
+
+      - name: Install sysstat if not installed
+        apt:
+            name: sysstat
+            state: present
+
+      - name: Check Disk I/O performance
+        command: iostat -x
+        register: disk_io
+        ignore_errors: true
+
+      - name: Log Disk I/O performance
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Checking Disk I/O performance ======\n{{ disk_io.stdout }}"
+            create: yes
+        when: disk_io.stdout is defined
+
+      - name: Check Network connectivity
+        command: ping -4 -c 4 google.com
+        register: ping_result
+        ignore_errors: true
+
+      - name: Log Network connectivity status
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Checking network connectivity ======\n{{ 'Network is reachable' if ping_result.rc == 0 else 'Network is NOT reachable' }}"
+            create: yes
+        when: ping_result.stdout is defined
+
+      - name: Check Running Services
+        command: systemctl list-units --type=service --state=running
+        register: running_services
+
+      - name: Log Running Services
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Running Services ======\n{{ running_services.stdout }}"
+            create: yes
+        when: running_services.stdout is defined
+
+      - name: Install UFW if not installed
+        apt:
+            name: ufw
+            state: present
+
+      - name: Check Firewall Status
+        command: ufw status
+        register: firewall_status
+        ignore_errors: true
+
+      - name: Log Firewall status and rules
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Firewall Status ======\n{{ 'UFW is active. Here are the rules:' if 'Status: active' in firewall_status.stdout else 'Firewall is inactive.' }}"
+            create: yes
+        when: firewall_status.stdout is defined
+
+      - name: Log UFW rules
+        command: ufw status verbose
+        register: ufw_rules
+        when: "'Status: active' in firewall_status.stdout"
+
+      - name: Log UFW rules to log file
+        lineinfile:
+            path: '{{ log_file }}'
+            line: '{{ ufw_rules.stdout }}'
+            create: yes
+        when: ufw_rules.stdout is defined
+
+      - name: Install net-tools if not installed
+        apt:
+            name: net-tools
+            state: present
+
+      - name: Check Ports Listening
+        command: netstat -tlpun
+        register: ports_listening
+        ignore_errors: true
+
+      - name: Log Listening Ports
+        lineinfile:
+            path: '{{ log_file }}'
+            line: "\n====== Ports Listening ======\n{{ ports_listening.stdout }}"
+            create: yes
+        when: ports_listening.stdout is defined
+
+      - name: Log completion message
+        lineinfile:
+            path: '{{ log_file }}'
+            line: '====== Server Check Completed ======'

@@ -1,0 +1,7 @@
+# inventory_file: "vagrant:192.168.33.10:/home/vagrant,vagrant:192.168.33.11:/home/vagrant,vagrant:192.168.33.12:/home/vagrant,jenkins:192.168.33.12:/home/jenkins"
+source_file: './copy_target'
+dest_path: '/home/{{ssh_user}}'
+build_number: 1
+workspace: './'
+ssh_user: 'vagrant'
+ssh_pass: 1

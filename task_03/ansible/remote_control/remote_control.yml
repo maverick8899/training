@@ -1,0 +1,49 @@
+- hosts: srv_02
+  become: yes
+  roles:
+      - geerlingguy.nginx
+  vars:
+      nginx_upstreams:
+          - name: nginx
+            servers:
+                - '127.0.0.1:80'
+      nginx_vhosts:
+          - listen: '80'
+            server_name: 'nginx.local'
+            return: '301 https://nginx.local$request_uri'
+            filename: 'nginx80.local.conf'
+
+          - listen: '443 ssl'
+            http2: 'on'
+            server_name: 'nginx.local'
+            # server_name_redirect: 'nginx.local'
+            # root: '/var/www/example.com'
+            # index: 'index.php index.html index.htm'
+            # error_page: ''
+            # access_log: ''
+            # error_log: ''
+            access_log: '/var/log/nginx/nginx.access.log'
+            error_log: '/var/log/nginx/nginx.error.log'
+            state: 'present' #? make sure this is existing, if existing it skip override
+            #   template: '{{ nginx_vhost_template }}' #? specify template to pass these objects to there
+            filename: 'nginx443.local.conf' #? name of this config
+            extra_parameters: |
+                ssl_certificate     /etc/nginx/ssl/nginx.local.crt;
+                ssl_certificate_key /etc/nginx/ssl/nginx.local.key;
+                ssl_protocols       TLSv1.1 TLSv1.2;
+                ssl_ciphers         HIGH:!aNULL:!MD5;
+                location / {
+                    root /var/www/html;  
+                    index index.html;
+                    try_files $uri $uri/ =404;
+                }
+                # location / {
+                #     proxy_pass http://nginx;
+                #     proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+                #     proxy_redirect off;
+
+                #     proxy_set_header Host $host;
+                #     proxy_set_header X-Real-IP $remote_addr;
+                #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                #     proxy_set_header X-Forwarded-Proto https;
+                # }

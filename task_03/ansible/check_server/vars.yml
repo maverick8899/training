@@ -1,0 +1,6 @@
+# log_file: "{{ workspace}}/jenkins_server_check.log"
+ip_ports: "192.168.33.11:22,192.168.33.12:22,www.facebook.com:43,google.com:80"
+build_number: 1
+workspace: "./"
+ssh_user: 'vagrant'
+ssh_pass: 1

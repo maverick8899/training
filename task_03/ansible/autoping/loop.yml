@@ -1,0 +1,27 @@
+- name: Ping each target
+  command: "ping -4 -c 4 {{ item.split(':')[0] }}"
+  register: ping_result
+  ignore_errors: true
+
+- name: Log Ping results
+  lineinfile:
+      path: '{{ log_file }}'
+      line: "\n[{{index}}] ====== Host: {{ item.split(':')[0] }} ======\nPing: {{ 'successful' if ping_result is succeeded else 'failed' }}"
+      create: yes
+  when: ping_result is defined 
+
+- name: Check if port is open using nc
+  command: "nc -z -w 5 {{ item.split(':')[0] }} {{ item.split(':')[1] }}"
+  register: port_result
+  ignore_errors: true
+
+- name: Log Port check results
+  lineinfile:
+      path: '{{ log_file }}'
+      line: "Check port {{ item.split(':')[1] }}: {{ 'open' if port_result.rc == 0 else 'closed' }}"
+      create: yes
+  when: port_result is defined 
+
+- name: Increment index
+  set_fact:
+    index: "{{ index | int + 1 }}"
