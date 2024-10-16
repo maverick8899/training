@@ -9,7 +9,6 @@ import os
 
 def execute():
     session = requests.Session()
-    response = session.get(config.WEB_URL)
 
     login_data = {
         'email': config.EMAIL,
@@ -37,8 +36,12 @@ def execute():
     courses = ''
     if login_response.status_code == 200 and access_token != None:
         print("✅✅✅ Login successfully ✅✅✅ \n")
+
+        #@ Get courses
         courses = get_courses.execute(session, headers, cookies={
                                       **cookies, 'access_token': access_token}, api=config.GET_COURSE_API)
+        
+        #@ Logout
         logout.execute(session, headers, cookies={
                        **cookies, 'access_token': access_token}, api=config.LOGOUT_API)
     else:

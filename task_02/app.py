@@ -4,6 +4,7 @@ app = Flask(__name__)
 
 courses = login.execute()
 
+print(courses)
 
 @app.route('/')
 def index():
