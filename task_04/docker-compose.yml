@@ -1,46 +1,10 @@
-volumes:
-    data:
-    data2:
-    data3:
-
-secrets:
-    ca.crt:
-        file: ./secrets/certificate_authority/ca/ca.crt
-
-    elasticsearch.keystore:
-        file: ./secrets/elasticsearch.keystore
-    elastic-stack-ca.p12:
-        file: ./secrets/certificate_authority/elastic-stack-ca.p12
-    elasticsearch.key:
-        file: ./secrets/certificates/elasticsearch/elasticsearch.key
-    elasticsearch.cert:
-        file: ./secrets/certificates/elasticsearch/elasticsearch.crt
-    elasticsearch1.key:
-        file: ./secrets/certificates/elasticsearch1/elasticsearch1.key
-    elasticsearch1.cert:
-        file: ./secrets/certificates/elasticsearch1/elasticsearch1.crt
-    elasticsearch2.key:
-        file: ./secrets/certificates/elasticsearch2/elasticsearch2.key
-    elasticsearch2.cert:
-        file: ./secrets/certificates/elasticsearch2/elasticsearch2.crt
-    elasticsearch3.key:
-        file: ./secrets/certificates/elasticsearch3/elasticsearch3.key
-    elasticsearch3.cert:
-        file: ./secrets/certificates/elasticsearch3/elasticsearch3.crt
-
-    kibana.key:
-        file: ./secrets/certificates/kibana/kibana.key
-    kibana.cert:
-        file: ./secrets/certificates/kibana/kibana.crt
-
 services:
     elasticsearch:
         container_name: elasticsearch
         hostname: elasticsearch
-        build:
-            context: elasticsearch/
-            args:
-                ELK_VERSION: ${ELK_VERSION}
+        image: maverick0809/elasticsearch_tls:7.16.0
+        # build:
+        #     context: elasticsearch/
         restart: unless-stopped
         environment:
             CONFIG_DIR: ${ELASTIC_DIR}/config
@@ -50,17 +14,7 @@ services:
             bootstrap.memory_lock: 'true'
             discovery.type: single-node
         volumes:
-            - data:${ELASTIC_DIR}
-            - ./elasticsearch/config/elasticsearch.yml:${ELASTIC_DIR}/config/elasticsearch.yml:ro
-        secrets:
-            - source: elasticsearch.keystore
-              target: ${ELASTIC_DIR}/config/elasticsearch.keystore
-            - source: ca.crt
-              target: ${ELASTIC_DIR}/config/ca.crt
-            - source: elasticsearch.cert
-              target: ${ELASTIC_DIR}/config/elasticsearch.crt
-            - source: elasticsearch.key
-              target: ${ELASTIC_DIR}/config/elasticsearch.key
+            - elasticsearch_data:${ELASTIC_DIR}
         ports:
             - '9200:9200'
             - '9300:9300'
@@ -82,26 +36,16 @@ services:
     kibana:
         container_name: kibana
         hostname: kibana
-        build:
-            context: kibana/
-            args:
-                ELK_VERSION: $ELK_VERSION
-        restart: unless-stopped
-        volumes:
-            - ./kibana/config/kibana.yml:${KIBANA_DIR}/config/kibana.yml:ro
+        image: maverick0809/kibana_tls:7.16.0
+        # build:
+        #     context: kibana/
+        restart: unless-stopped 
         environment:
             CONFIG_DIR: ${KIBANA_DIR}/config
             ELASTIC_USERNAME: ${ELASTIC_USERNAME}
             ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
             ENCRYPTION_KEY: ${XPACK_ENCRYPTION_KEY}
             KIBANA_URL: ${KIBANA_URL}
-        secrets:
-            - source: ca.crt
-              target: ${KIBANA_DIR}/config/ca.crt
-            - source: kibana.cert
-              target: ${KIBANA_DIR}/config/kibana.crt
-            - source: kibana.key
-              target: ${KIBANA_DIR}/config/kibana.key
         healthcheck:
             test: curl -s https://kibana:5601 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
             interval: 30s
@@ -117,3 +61,5 @@ services:
 networks:
     efk:
         driver: bridge
+volumes:
+    elasticsearch_data:
