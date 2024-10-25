@@ -62,7 +62,7 @@ services:
             - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
         # environment:
         #     CONFIG_DIR: /usr/share/kibana/config
-        #     ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+            # ELASTIC_USERNAME: ${ELASTIC_USERNAME}
         #     ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
         #     ENCRYPTION_KEY: ${XPACK_ENCRYPTION_KEY}
         #     KIBANA_URL: ${KIBANA_URL}
