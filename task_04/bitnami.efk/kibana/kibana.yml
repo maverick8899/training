@@ -1,0 +1,28 @@
+---
+server.name: kibana
+server.host: 0.0.0.0
+server.port: 5601
+
+server.publicBaseUrl: "${KIBANA_URL}"
+
+#@ Elasticsearch settings
+elasticsearch.hosts: "https://elasticsearch:9200"
+elasticsearch.ssl.certificateAuthorities: [ "${CONFIG_DIR}/ca.crt" ] 
+elasticsearch.serviceAccountToken: "${ELASTIC_SERVICE_ACCOUNT_TOKEN}"
+
+
+#@ X-Pack Security
+# xpack.security.enabled: true #? setting no longer exists in Kibana 8 Security is enabled by default, so you should simply remove that setting from your kibana.yml
+xpack.encryptedSavedObjects.encryptionKey: "${ENCRYPTION_KEY}" #? set encryption key for object like (dashboard, visualization,..)
+xpack.security.encryptionKey: "${ENCRYPTION_KEY}" #? equivalently, kind of: user notification relating to security
+xpack.reporting.encryptionKey: "${ENCRYPTION_KEY}" #? for reporting feature(download, create,..)
+
+#@ SSL settings
+server.ssl.enabled: true
+server.ssl.certificate: "${CONFIG_DIR}/kibana.crt"
+server.ssl.key: "${CONFIG_DIR}/kibana.key"
+server.ssl.certificateAuthorities: [ "${CONFIG_DIR}/ca.crt" ]
+elasticsearch.ssl.verificationMode: certificate
+
+#@ enable monitoring Elasticsearch on kibana
+monitoring.ui.container.elasticsearch.enabled: true 
