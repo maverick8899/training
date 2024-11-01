@@ -1,8 +1,17 @@
 #!/bin/bash
 
-ES_SECRET_DIR=../../bitnami.efk/elasticsearch/secret/
-KIBANA_SECRET_DIR=../../bitnami.efk/kibana/secret/
-FLUENTD_SECRET_DIR=../../bitnami.efk/fluentd/secret/
+while true; do
+    read -p "Do you want to replace all of the keys? (y/n): " answer
+    case $answer in
+        [Yy]* ) echo "Executing the script."; break;;
+        [Nn]* ) echo "Exit."; exit;;
+        * ) echo "Please type y or n.";;
+    esac
+done
+
+ES_SECRET_DIR=../../bitnami.efk/elasticsearch/
+KIBANA_SECRET_DIR=../../bitnami.efk/kibana/
+FLUENTD_SECRET_DIR=../../bitnami.efk/fluentd/
 target_dirs=($ES_SECRET_DIR $KIBANA_SECRET_DIR $FLUENTD_SECRET_DIR)
 
 echo -e "====== Replace root CA ======\n"
