@@ -5,7 +5,6 @@ services:
         command: bash ${ELASTIC_DIR}/config/setup.sh
         user: '0'
         volumes:
-            # - ./swag:/swag/
             - ./secrets:/secrets/
             - ./helper/setup.sh:${ELASTIC_DIR}/config/setup.sh
             - ./helper/instances.yml:${ELASTIC_DIR}/config/instances.yml:ro
@@ -14,15 +13,3 @@ services:
             SUBDOMAIN: ${SUBDOMAIN}
             SUBFOLDER: ${SUBFOLDER}
             STAGING: ${STAGING}
-        networks:
-            - elk
-
-volumes:
-    secrets:
-        driver: local
-    setup:
-        driver: local
-
-networks:
-    elk:
-        driver: bridge

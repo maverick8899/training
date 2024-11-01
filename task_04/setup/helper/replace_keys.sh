@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# target_dirs=(../../bitnami.efk/elasticsearch/secret/ ../../bitnami.efk/kibana/secret/ ../../bitnami.efk/fluentd/secret/ )
-ES_SECRET_DIR=../../bitnami.efk/elasticsearch/
-KIBANA_SECRET_DIR=../../bitnami.efk/kibana/
-FLUENTD_SECRET_DIR=../../bitnami.efk/fluentd/
+ES_SECRET_DIR=../../bitnami.efk/elasticsearch/secret/
+KIBANA_SECRET_DIR=../../bitnami.efk/kibana/secret/
+FLUENTD_SECRET_DIR=../../bitnami.efk/fluentd/secret/
 target_dirs=($ES_SECRET_DIR $KIBANA_SECRET_DIR $FLUENTD_SECRET_DIR)
 
 echo -e "====== Replace root CA ======\n"
