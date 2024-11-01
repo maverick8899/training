@@ -49,8 +49,7 @@ cd elastic.efk ; docker compose up
 		https://hub.docker.com/r/bitnami/ 
 + Elastic 
 	+ Dockerfile
-https://github.com/elastic/elasticsearch-docker/blob/master/.tedi/template/Dockerfile.j2
-https://github.com/elastic/kibana-docker/blob/master/.tedi/template/Dockerfile.j2
+	https://github.com/elastic
 	+ Docker Hub
 	https://hub.docker.com/u/elastic
 + Document:
