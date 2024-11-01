@@ -59,28 +59,11 @@ services:
             ELASTIC_HOST: ${ELASTIC_HOST}
             ELASTIC_URL: 'https://${ELASTIC_HOST}:9200'
         volumes:
-            - /var/lib/docker/containers:/var/lib/docker/containers 
-            - ./fluentd/config/fluentd.conf:/opt/bitnami/fluentd/conf/fluentd.conf
-            # - ./fluentd/init.sh:/docker-entrypoint-initdb.d/init.sh
+            - /var/lib/docker/containers:/var/lib/docker/containers  
         depends_on:
             - elasticsearch
         networks:
-            - efk
-
-    nginx:
-        image: nginx
-        container_name: nginx
-        # logging:
-        #     driver: "fluentd"
-        #     options:
-        #         fluentd-address: "fluentd:24224" 
-        #         tag: "nginx"
-        ports:
-            - '8080:80'
-        volumes:
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-        networks:
-            - efk
+            - efk 
 
 networks:
     efk:

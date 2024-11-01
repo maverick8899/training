@@ -64,8 +64,7 @@ services:
             ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
             ELASTIC_HOST: ${ELASTIC_HOST}
         volumes:
-            - /var/lib/docker/containers:/var/lib/docker/containers
-            - fluentd_conf:/opt/bitnami/fluentd/conf/
+            - /var/lib/docker/containers:/var/lib/docker/containers 
         depends_on:
             - elasticsearch
         networks:

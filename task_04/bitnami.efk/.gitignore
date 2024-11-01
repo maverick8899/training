@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 secrets/*
+template/swarm/efk.yml
 *.DS_Store
 # .env 
 # C extensions
