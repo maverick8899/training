@@ -1,2 +1,7 @@
 .history
 .vscode
+efk
+*.key   
+*.crt
+*.keystore
+*.truststore

@@ -1,0 +1,50 @@
+instances:
+    #? mapping: {elasticsearch:0.0.0.0, localhost:127.0.0.1}
+    #? Common Name (CN): elasticsearch.
+    #? Subject Alternative Names (SAN): DNS: elasticsearch, IP: 0.0.0.0, DNS: localhost, IP: 127.0.0.1.
+    - name: elasticsearch
+      dns:
+          - elasticsearch
+          - elasticsearch1
+          - elasticsearch2
+          - elasticsearch3
+          - localhost
+      ip:
+          - "0.0.0.0"
+          - '127.0.0.1'
+          
+    - name: kibana
+      dns:
+          - kibana
+          - localhost
+      ip:
+          - '0.0.0.0'
+          - '127.0.0.1'
+    - name: logstash
+      dns:
+          - logstash
+          - localhost
+      ip:
+          - '0.0.0.0'
+          - '127.0.0.1'
+    - name: filebeat
+      dns:
+          - filebeat
+          - localhost
+      ip:
+          - '0.0.0.0'
+          - '127.0.0.1'
+    - name: metricbeat
+      dns:
+          - metricbeat
+          - localhost
+      ip:
+          - '0.0.0.0'
+          - '127.0.0.1'
+    - name: packetbeat
+      dns:
+          - packetbeat
+          - localhost
+      ip:
+          - '0.0.0.0'
+          - '127.0.0.1'
