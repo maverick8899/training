@@ -1,7 +1,7 @@
 #!/bin/bash
 
 while true; do
-    if ! curl -k -s https://elasticsearch:9200 >/dev/null; then
+    if ! curl -k -s $ELASTICSEARCH_URL >/dev/null; then
         echo "Waiting for Elasticsearch to be ready..."
         sleep 5
     else

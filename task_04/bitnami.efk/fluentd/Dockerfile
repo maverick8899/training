@@ -9,9 +9,9 @@ RUN groupadd -g 1001 fluentd && \
 RUN apt update -y ; apt install curl -y
 RUN mkdir /docker-entrypoint-initdb.d
 
-COPY ca.crt /usr/local/share/ca-certificates/ca.crt
-COPY init.sh /docker-entrypoint-initdb.d/init.sh
-COPY fluentd.conf /opt/bitnami/fluentd/conf/fluentd.conf 
+COPY secret/ca.crt /usr/local/share/ca-certificates/ca.crt
+COPY bin/init.sh /docker-entrypoint-initdb.d/init.sh
+COPY config/fluentd.conf /opt/bitnami/fluentd/conf/fluentd.conf 
 
 RUN update-ca-certificates
 RUN chown 1001:0 ${FLUENTD_DIR} -R

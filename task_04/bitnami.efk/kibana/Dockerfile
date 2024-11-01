@@ -10,12 +10,13 @@ RUN groupadd -g 1001 kibana && \
     useradd -u 1001 -g kibana -m -d ${CONFIG_DIR} -s /bin/bash kibana && \
     chgrp 0 ${CONFIG_DIR} 
 
-COPY ca.crt /usr/local/share/ca-certificates/ca.crt
-COPY ca.crt ${CONFIG_DIR}/ca.crt
-COPY kibana.crt ${CONFIG_DIR}/kibana.crt
-COPY kibana.key ${CONFIG_DIR}/kibana.key
-COPY kibana.yml ${CONFIG_DIR}/kibana.yml
-COPY entrypoint.sh /opt/bitnami/scripts/kibana/entrypoint.sh
+COPY secret/ca.crt /usr/local/share/ca-certificates/ca.crt
+COPY secret/ca.crt ${CONFIG_DIR}/ca.crt
+COPY secret/kibana.crt ${CONFIG_DIR}/kibana.crt
+COPY secret/kibana.key ${CONFIG_DIR}/kibana.key
+    
+COPY config/kibana.yml ${CONFIG_DIR}/kibana.yml
+COPY bin/entrypoint.sh /opt/bitnami/scripts/kibana/entrypoint.sh
 RUN update-ca-certificates
 
 RUN chmod ug+x /opt/bitnami/scripts/kibana/entrypoint.sh
