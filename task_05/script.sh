@@ -21,6 +21,7 @@ docker run -d \
     --restart always \
     -e USER_UID=1500 \
     -e USER_GID=1500 \
+    -v $(pwd)/gitea:/data \
     -v /home/git/.ssh:/data/git/.ssh \
     -v /etc/timezone:/etc/timezone:ro \
     -v /etc/localtime:/etc/localtime:ro \

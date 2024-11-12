@@ -1,0 +1,34 @@
+networks:
+    gitea:
+        external: false
+
+services:
+    gitea:
+        image: gitea/gitea
+        container_name: gitea
+        environment:
+            - USER_UID=1000
+            - USER_GID=1000
+        restart: always
+        networks:
+            - gitea
+        volumes:
+            - /home/git/gitea:/data
+            - /home/git/.ssh/:/data/git/.ssh
+            - /etc/timezone:/etc/timezone:ro
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - '3000:3000'
+            - '2222:22'
+
+    minio:
+        image: maverick0809/minio
+        container_name: minio
+        ports:
+            - '9000:9000'
+            - '9001:9001'
+        volumes:
+            - ./storage:/data
+        command: server --console-address ":9001" /data
+        networks:
+            - gitea

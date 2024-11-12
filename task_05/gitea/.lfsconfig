@@ -1,0 +1,4 @@
+[lfs]
+  url = "http://minio:9000/demo"
+  accesskeyid = "RPxRYsyT1lpVkgixxVSj"
+  secretaccesskey = "FcCLVt5q5cUVnZnGmry1lc1axUu449gkUVEeEDXq"
