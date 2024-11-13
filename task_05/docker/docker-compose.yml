@@ -14,6 +14,7 @@ services:
             - gitea
         volumes:
             - /home/git/gitea:/data
+            - ../gitea/conf/app.ini:/data/gitea/conf/app.ini
             - /home/git/.ssh/:/data/git/.ssh
             - /etc/timezone:/etc/timezone:ro
             - /etc/localtime:/etc/localtime:ro

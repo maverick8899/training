@@ -1,6 +1,86 @@
 import os
 import subprocess
-import setup_minio
+import requests
+import random
+import string
+import sys
+
+print(os.getenv('MINIO_URL'))
+
+def generate_random_string(length):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
+accessKey=generate_random_string(20)
+secretKey=generate_random_string(40)
+bucket_name = sys.argv[1] if len(sys.argv) > 1 else "bucket"
+
+def config_gitea_minio():
+    session = requests.Session()
+    
+    cookies = { 
+        '_csrf': os.getenv('CSRF_TOKEN'),
+    }
+    headers = { 
+        'Content-Type': 'application/json'
+    }
+    json_data = {
+        'accessKey': os.getenv('MINIO_ROOT_USER'),
+        'secretKey': os.getenv('MINIO_ROOT_PASSWORD'),
+    }
+
+    #? store persistent cookie for the next request by remain alive session
+    response = session.post(f"{os.getenv('MINIO_URL')}/api/v1/login", cookies=cookies, headers=headers, json=json_data, verify=False)
+    print("Login: ",response.status_code, response.text) 
+    json_data = {
+        'policy': '',
+        'accessKey': accessKey,
+        'secretKey': secretKey,
+        'description': 'demo',
+        'comment': '',  
+        'name': '',
+        'expiry': None,
+    }
+    response = session.post(
+        f"{os.getenv('MINIO_URL')}/api/v1/service-account-credentials",
+        cookies=cookies,
+        headers=headers,
+        json=json_data,
+        verify=False,
+    )
+    print("Create token: ",response.status_code) 
+
+    json_data = {
+        'name': bucket_name,
+        'versioning': {
+            'enabled': True,
+            'excludePrefixes': [],
+            'excludeFolders': False,
+        },
+        'locking': False,
+    }
+    response = session.post(f"{os.getenv('MINIO_URL')}/api/v1/buckets", cookies=cookies, headers=headers, json=json_data)
+    print("Create bucket: ",response.status_code, response.text) 
+
+#? Create app.init for gitea
+    content = f"""[storage]
+STORAGE_TYPE = minio   
+MINIO_ENDPOINT = {os.getenv('MINIO_ENDPOINT')}
+MINIO_ACCESS_KEY_ID = {accessKey}
+MINIO_SECRET_ACCESS_KEY = {secretKey}
+MINIO_BUCKET = {bucket_name}
+MINIO_USE_SSL = {os.getenv('MINIO_USE_SSL')} 
+
+[server]
+LFS_START_SERVER = true
+
+[lfs]
+PATH = /data/git/lfs
+"""
+    # os.makedirs(os.getenv('GITEA_CONFIG'), exist_ok=True)
+    with open(f"{os.getenv('GITEA_CONFIG')}/app.ini", "w") as file:
+        file.write(content)
 
 def run_command(command):
     """Helper function to run shell commands."""
@@ -42,12 +122,11 @@ print("================Install Git LFS================")
 run_command("sudo apt update -y && sudo apt install -y git git-lfs && git lfs install")
 
 print("================Creating directories for Gitea and setting permissions================")
-os.makedirs("gitea", exist_ok=True)
-run_command("sudo chown git:git gitea")
+os.makedirs("gitea/gitea/conf", exist_ok=True)
 
 print("================Run Gitea and Minio================")
 run_command("sudo docker network create gitea")
-
+print("-------------start minio-------------")
 run_command(
     "sudo docker run -d "
     "--name minio "
@@ -58,11 +137,14 @@ run_command(
     "maverick0809/minio "
     "server --console-address ':9001' /data"
 )
-
+print("wait for minio to be ready")
 run_command("sleep 10")
-print("================Setup Minio================")
-setup_minio.execute()
 
+print("================Setup Gitea - Minio================")
+config_gitea_minio()
+
+run_command("sudo chown git:git gitea -R")
+print("-------------start gitea-------------")
 run_command(
     "sudo docker run -d "
     "--name gitea "
