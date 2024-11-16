@@ -51,6 +51,7 @@ setup_passwords() { #? log passwd in console
 create_keystore() { #? bootstrap.password used for elastic (user default)
     printf "========== Creating Elasticsearch Keystore ==========\n"
     printf "=====================================================\n"
+    #? create new keystore and ouput to /dev/null
     elasticsearch-keystore create >>/dev/null
 
     # Setting Bootstrap Password

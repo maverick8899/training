@@ -10,6 +10,12 @@ services:
         volumes:
             - 'elasticsearch_data:/bitnami/elasticsearch/data'
             - 'elasticsearch_conf:/opt/bitnami/elasticsearch/config/'
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 5
+                window: 120s
         ports:
             - '9200:9200'
         healthcheck:
@@ -49,6 +55,12 @@ services:
             interval: 30s
             timeout: 10s
             retries: 5
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 5
+                window: 120s
         ports:
             - '5601:5601'
         networks:
@@ -58,13 +70,21 @@ services:
 
     fluentd:
         image: maverick0809/bitnami_fluentd_tls:1.17.1v1
-        user: '0:0'
+        user: '1001:1001'
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 5
+                window: 120s
+        ports:
+            - '24224:24224'
         environment:
             ELASTIC_USERNAME: ${ELASTIC_USERNAME}
             ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
             ELASTIC_HOST: ${ELASTIC_HOST}
-        volumes:
-            - /var/lib/docker/containers:/var/lib/docker/containers 
+            ELASTIC_URL: 'https://${ELASTIC_HOST}:9200'
+            FLUENTD_LOG_LEVEL: ${FLUENTD_LOG_LEVEL}
         depends_on:
             - elasticsearch
         networks:

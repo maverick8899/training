@@ -10,12 +10,14 @@ while true; do
     fi
 done
 
-touch /opt/bitnami/fluentd/logs/fluentd.log
-# log_folder=$(cat /proc/self/cgroup | grep "docker" | sed 's/.*\///' | uniq)
-log_folder=$(ls -1 /var/lib/docker/containers/ | grep $(cat /etc/hostname))
-export LOG_PATH="/var/lib/docker/containers/$log_folder/$log_folder-json.log"
-echo "$LOG_PATH"
-tail -f "$LOG_PATH" >>/opt/bitnami/fluentd/logs/fluentd.log &
+
+# fluent-gem install fluent-plugin-tail-multiline
+# touch /opt/bitnami/fluentd/logs/fluentd.log
+# # log_folder=$(cat /proc/self/cgroup | grep "docker" | sed 's/.*\///' | uniq)
+# log_folder=$(ls -1 /var/lib/docker/containers/ | grep $(cat /etc/hostname))
+# export LOG_PATH="/var/lib/docker/containers/$log_folder/$log_folder-json.log"
+# echo "$LOG_PATH"
+# tail -f "$LOG_PATH" >>/opt/bitnami/fluentd/logs/fluentd.log &
 
 # ln -sf /dev/stdout /opt/bitnami/fluentd/logs/fluentd.log
 # ln -sf /dev/stderr /opt/bitnami/fluentd/logs/fluentd_e.log

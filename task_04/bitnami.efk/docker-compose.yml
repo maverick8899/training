@@ -6,7 +6,7 @@ services:
         restart: unless-stopped
         environment:
             CONFIG_DIR: /opt/bitnami/elasticsearch/config
-            ES_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP} 
+            ES_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP}
         ports:
             - '9200:9200'
         healthcheck:
@@ -35,7 +35,7 @@ services:
             KIBANA_ELASTICSEARCH_URL: 'https://elasticsearch:9200'
             KIBANA_URL: https://0.0.0.0:5601
             KIBANA_HOST: 0.0.0.0
-            KIBANA_PORT_NUMBER: 5601 
+            KIBANA_PORT_NUMBER: 5601
             ELASTIC_USERNAME: ${ELASTIC_USERNAME}
             ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
         healthcheck:
@@ -52,39 +52,29 @@ services:
 
     fluentd:
         image: maverick0809/bitnami_fluentd_tls:1.17.1v1
-        user: '0:0'
+        user: '1001:1001'
+        container_name: fluentd
+        ports:
+            - 24224:24224
         environment:
             ELASTIC_USERNAME: ${ELASTIC_USERNAME}
             ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
             ELASTIC_HOST: ${ELASTIC_HOST}
             ELASTIC_URL: 'https://${ELASTIC_HOST}:9200'
+            FLUENTD_LOG_LEVEL: 'debug'  # debug, info, warm
         volumes:
-            - /var/lib/docker/containers:/var/lib/docker/containers 
-            - ./fluentd/config/fluentd.conf:/opt/bitnami/fluentd/conf/fluentd.conf
-            # - ./fluentd/init.sh:/docker-entrypoint-initdb.d/init.sh
+            - ./fluentd/config/fluentd_aggregator.conf:/opt/bitnami/fluentd/conf/fluentd.conf
+            # - ./fluentd/config/fluentd.conf:/opt/bitnami/fluentd/conf/fluentd.conf
+            - ./fluentd/bin/init.sh:/docker-entrypoint-initdb.d/init.sh
         depends_on:
             - elasticsearch
-        networks:
-            - efk
-
-    nginx:
-        image: nginx
-        container_name: nginx
-        # logging:
-        #     driver: "fluentd"
-        #     options:
-        #         fluentd-address: "fluentd:24224" 
-        #         tag: "nginx"
-        ports:
-            - '8080:80'
-        volumes:
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
         networks:
             - efk
 
 networks:
     efk:
         driver: bridge
+
 volumes:
     elasticsearch_data:
         driver: local

@@ -6,6 +6,7 @@ __pycache__/
 secrets/*
 template/swarm/efk.yml
 *.DS_Store
+fluentbit
 # .env 
 # C extensions
 *.so

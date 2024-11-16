@@ -11,7 +11,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 COPY secret/ca.crt /usr/local/share/ca-certificates/ca.crt
 COPY bin/init.sh /docker-entrypoint-initdb.d/init.sh
-COPY config/fluentd.conf /opt/bitnami/fluentd/conf/fluentd.conf 
+COPY config/fluentd_aggregator.conf /opt/bitnami/fluentd/conf/fluentd.conf 
 
 RUN update-ca-certificates
 RUN chown 1001:0 ${FLUENTD_DIR} -R

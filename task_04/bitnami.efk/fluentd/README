@@ -1,0 +1,45 @@
+fluentd-async: 'true': This configuration allows Docker to connect to Fluentd in the background. Messages are buffered until the connection is established. This helps prevent application blocking when Fluentd is unavailable. The Docker Engine release notes indicate that this option replaces the deprecated fluentd-async-connect.
+
+fluentd-async-reconnect-interval: '1s': When fluentd-async is enabled, this option defines the interval (in milliseconds) at which the connection to fluentd-address is re-established. In this case, it's set to 1 second. The Fluentd logging driver options explain that this is useful if the address resolves to one or more IP addresses.
+
+fluentd-retry-wait: '1s': This is the wait time between retries, set to 1 second. The Fluentd logging driver options state that the default is 1 second.
+
+fluentd-request-ack: 'true': When enabled, the Fluentd logging driver sends the chunk option with a unique ID. The server will respond with an acknowledgement. This improves the reliability of message transmission.
+
+fluentd-max-retries: '4294967295': This is the maximum number of retries. The value is set to 4294967295, which is the default according to the Fluentd logging driver options.
+
+fluentd-buffer-limit: '8388608': This is the number of events buffered in memory(log records). Records will be stored in memory up to this number. If the buffer is full, the call to record logs will fail. The default is 1048576, but here it's set to 8388608.
+
+Mode:
++ Blocking Mode: it prioritizes logging
+In this mode, logging happens directly from the container to the logging driver. If the logging process encounters issues, it can slow down or even block the application. If the logging driver cannot process a message, the logging process will be blocked, which may cause the application to stall. This mode ensures all log messages are recorded as long as no errors occur. It is the default mode and does not require any additional configuration.
+
++ Non-blocking Mode: it prioritizes application performance
+This mode uses an intermediate buffer to temporarily store log messages before they are transferred to the logging driver(this can affect performance a slightly). It prevents the application from being blocked due to logging backpressure, allowing the application to continue running even if there are issues with logging. If the buffer becomes full, new messages will be dropped instead of blocking the logging process. While some log messages may be lost if the buffer is full, the priority is to keep the application running smoothly. This mode needs to be explicitly configured and allows adjusting the buffer size using the max-buffer-size option.
+
+max-buffer-size: '4m': This controls the size of the buffer used for intermediate message storage when mode is set to non-blocking. Here, it's set to 4 megabytes. The Configure the delivery mode of log messages states that the default is 1m (1 megabyte).
+
+
+Buffering strategy:
+When the connection to the Fluentd server fails, fluentd-async: true allows the logs to be temporarily stored in a buffer within the Fluentd log driver. The maximum buffer size can be controlled by the fluentd-buffer-limit option, ensuring the buffer doesn't grow indefinitely.
+
+Buffering in Non-Blocking Mode: When the non-blocking mode is enabled, the Docker logging driver sets up an intermediate buffer at the container level. The purpose of this container-level buffer is to store logs briefly before forwarding them to the Fluentd server or, if the Fluentd server is unavailable, to the Fluentd log driver’s internal buffer.
+
+Log Flow
+Fluentd Server Available
+Setup: fluentd-async: true and non-blocking mode enabled.
+Flow: Logs flow from the container to the container-level buffer → Fluentd server.
+Buffering: Logs are quickly forwarded to Fluentd as it’s available.
+
+Setup: Blocking mode.
+Flow: Logs flow directly from the container to the Fluentd server. If the server is unavailable, logs are dropped.
+Fluentd Server Unavailable
+
+Setup: fluentd-async: true and non-blocking mode enabled.
+Flow: Logs flow from the container to the container-level buffer → Fluentd log driver’s internal buffer → wait for Fluentd server to reconnect.
+Buffering: Logs initially fill the container-level buffer, then move to the Fluentd log driver’s internal buffer, where they remain until the server connection is restored.
+
+Setup: fluentd-async: true and blocking mode.
+Flow: Logs are stored in the Fluentd log driver’s internal buffer, waiting for the Fluentd server to become available.
+
+
