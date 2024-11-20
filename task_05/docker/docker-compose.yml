@@ -5,11 +5,11 @@ networks:
 services:
     gitea:
         image: gitea/gitea
+        restart: unless-stopped
         container_name: gitea
         environment:
             - USER_UID=1000
             - USER_GID=1000
-        restart: always
         networks:
             - gitea
         volumes:
@@ -27,11 +27,46 @@ services:
     minio:
         image: maverick0809/minio
         container_name: minio
+        restart: unless-stopped
         ports:
             - '9000:9000'
             - '9001:9001'
         volumes:
             - ./storage:/data
         command: server --console-address ":9001" /data
+        networks:
+            - gitea
+
+    npm:
+        image: 'jc21/nginx-proxy-manager:latest'
+        restart: unless-stopped
+        container_name: npm
+        ports:
+            - '80:80'
+            - '81:81'
+            - '443:443'
+        environment:
+            DB_MYSQL_HOST: 'db'
+            DB_MYSQL_PORT: 3306
+            DB_MYSQL_USER: 'npm'
+            DB_MYSQL_PASSWORD: 'npm'
+            DB_MYSQL_NAME: 'npm'
+        volumes:
+            - ./data:/data
+            - ./letsencrypt:/etc/letsencrypt
+        networks:
+            - gitea
+
+    db:
+        image: 'jc21/mariadb-aria:latest'
+        restart: unless-stopped
+        container_name: npm_db
+        environment:
+            MYSQL_ROOT_PASSWORD: 'npm'
+            MYSQL_DATABASE: 'npm'
+            MYSQL_USER: 'npm'
+            MYSQL_PASSWORD: 'npm'
+        volumes:
+            - ./npm_db:/var/lib/mysql
         networks:
             - gitea
