@@ -15,6 +15,7 @@ import zipfile
 import sys
 import requests
 import logging
+import psutil
 
 file_exe_pattern = r".*\.exe$"
 repo_url = "http://gitea.local/kimbang/new_kiosk"
@@ -101,6 +102,17 @@ def check_files_in_folder(folder_path, filenames):
         result[filename] = os.path.isfile(file_path)  # Check if it's a file
     return result
 
+def kill_process(process_name):
+    for proc in psutil.process_iter(attrs=['pid', 'name']):
+        if process_name in proc.info['name']:
+            proc.kill()
+            print(f"Process {process_name} is killed.")
+            return
+    print(f"Process {process_name} not found.")
+
+logger.info("=============== Kill Auto Update App =================")
+print("=============== Kill Auto Update App =================")
+kill_process("AutoUpgradeApp")
 def fetch_extract_repo(repo_url,setup_folder_path):
     logger.info(f"Cloning repository from {repo_url} into {setup_folder_path}...")
     print(f"Cloning repository from {repo_url} into {setup_folder_path}...")
@@ -142,6 +154,11 @@ def find_file(parent_path="C:/Setup/Support Exe", pattern="*"):
             file = os.path.normpath(file) 
             return file
  
+medipay_bin_path = find_file(medipay_folder_path, file_exe_pattern)
+api_bin_path = find_file(api_folder_path, file_exe_pattern)
+cccd_bin_path = find_file(cccd_folder_path, file_exe_pattern)
+medipay_updater_bin_path = find_file(medipay_updater_folder_path,file_exe_pattern)
+
 logger.info("=============== Check path is existing =================")
 print("=============== Check path is existing =================")
 for path in paths:
@@ -176,11 +193,10 @@ print(f"\n=============== Install VC_redist: {redist_setup_bin_path} ===========
 # threading.Thread(target=run_command  , args=(str(redist_setup_bin_path),)).start() #>
 run_command(str(redist_setup_bin_path))
 
-medipay_updater_bin_path = find_file(medipay_updater_folder_path,file_exe_pattern)
 logger.info(f"\n=============== Install medipay updater: {medipay_updater_folder_path} =================")
 print(f"\n=============== Install medipay updater: {medipay_updater_folder_path} =================")
-# threading.Thread(target=run_command  , args=(str(medipay_updater_bin_path), True,)).start() #>
-run_command(str(medipay_updater_bin_path))
+threading.Thread(target=run_command  , args=(str(medipay_updater_bin_path), True,)).start() #>
+# run_command(str(medipay_updater_bin_path))
 
 logger.info("=============== Check if printer w80 is already installed or not =================")
 print("=============== Check if printer w80 is already installed or not =================")
@@ -217,15 +233,12 @@ def create_shortcut(target, shortcut_name):
 
 logger.info("================= Config auto-start configuration for MediPay, HN212 and API ================= ")
 print("================= Config auto-start configuration for MediPay, HN212 and API ================= ")
-medipay_bin_path = find_file(medipay_folder_path, file_exe_pattern)
-api_bin_path = find_file(api_folder_path, file_exe_pattern)
-cccd_bin_path = find_file(cccd_folder_path, file_exe_pattern)
-
 create_shortcut(medipay_bin_path, "MediPay")
 create_shortcut(api_bin_path, "API")
 create_shortcut(cccd_bin_path, "HN212")
+create_shortcut(medipay_updater_bin_path, "Auto_Updater")
 
-filenames = ["MediPay.lnk", "API.lnk", "HN212.lnk"] 
+filenames = ["MediPay.lnk", "API.lnk", "HN212.lnk","Auto_Updater.lnk"] 
 check_result = check_files_in_folder(startup_folder, filenames)
 
 for filename, exists in check_result.items():

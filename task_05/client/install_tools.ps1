@@ -52,13 +52,8 @@ function Install-Choco{
 }
 
 function Install-ChocoPackages { 
-    foreach ($package in $packages) { 
-        # if (Get-Command $package -ErrorAction SilentlyContinue) {
-        #     Write-Host "$package is already installed." -ForegroundColor Green
-        # } else {
-            # Write-Host "$package is not installed. Installing..." -ForegroundColor Yellow
+    foreach ($package in $packages) {  
         choco install $package -y 
-        # }
     }
     
     Write-Output "Refresh environment" 
