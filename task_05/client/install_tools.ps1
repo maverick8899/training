@@ -139,14 +139,8 @@ function Clean {
     # Start-Process powershell -ArgumentList "-Command Remove-Item -Path '$self' -Force" -NoNewWindow -Wait
 }
 
-#@ Call the function
-if (Get-Command choco -ErrorAction SilentlyContinue) {
-    Write-Host "Chocolatey is already installed."
-} else {
-    Write-Host "Chocolatey is not installed. Installing now..."
-    Install-Choco
-}
-
+#@ Call the function 
+Install-Choco
 Install-ChocoPackages
 Run-Script
 Disable-Window-Update
