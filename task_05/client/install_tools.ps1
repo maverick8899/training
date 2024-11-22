@@ -139,7 +139,7 @@ function Clean {
     # Start-Process powershell -ArgumentList "-Command Remove-Item -Path '$self' -Force" -NoNewWindow -Wait
 }
 
-#@ Call the function 
+#@ Call the function
 Install-Choco
 Install-ChocoPackages
 Run-Script
