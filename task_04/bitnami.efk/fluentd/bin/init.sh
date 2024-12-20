@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# fluent-gem install fluent-plugin-script
+# gem install fluent-plugin-dedup
+
 while true; do
     if ! curl -k -s $ELASTIC_URL >/dev/null; then
         echo "Waiting for Elasticsearch to be ready..."
@@ -9,6 +12,45 @@ while true; do
         break
     fi
 done
+
+echo "Creating new user $FLUENTD_USER..."
+response=$(curl -k -s -o /tmp/curl_output -w "%{http_code}" -X POST -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD "$ELASTIC_URL/_security/user/$FLUENTD_USER" \
+-H "Content-Type: application/json" \
+-d "{
+  \"password\": \"$FLUENTD_PASSWORD\",
+  \"roles\": [\"fluentd_writer\"]
+}")
+
+if [ "$response" -eq 200 ]; then
+  echo "User '$FLUENTD_USER' successfully created."
+else
+  echo "Failed to create user. HTTP status: $response"
+  echo "Response:"
+  cat /tmp/curl_output
+fi
+
+# Cấp quyền cho người dùng mới
+echo "Granting privileges to $FLUENTD_USER user..."
+response=$(curl -k -s -o /tmp/curl_output -w "%{http_code}" -X PUT -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD "$ELASTIC_URL/_security/role/fluentd_writer" \
+-H "Content-Type: application/json" \
+-d '{
+  "cluster": ["all"],
+  "indices": [
+    {
+      "names": ["*"],
+      "privileges": ["create_doc", "create", "delete", "index", "write", "all"]
+    }
+  ]
+}')
+
+if [ "$response" -eq 200 ]; then
+  echo "Role 'fluentd_writer' successfully created."
+else
+  echo "Failed to create role. HTTP status: $response"
+  echo "Response:"
+  cat /tmp/curl_output
+fi
+
 
 
 # fluent-gem install fluent-plugin-tail-multiline
