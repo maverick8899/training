@@ -1,0 +1,114 @@
+services:
+    elasticsearch:
+        hostname: elasticsearch
+        image: maverick0809/bitnami_elasticsearch_tls:8.15.3v1
+        user: '1001:1001'
+        restart: unless-stopped
+        environment:
+            CONFIG_DIR: /opt/bitnami/elasticsearch/config
+            ES_JAVA_OPTS: -Xmx${ELASTICSEARCH_HEAP} -Xms${ELASTICSEARCH_HEAP}
+        volumes:
+            - '/mnt/efk-data/elasticsearch:/opt/bitnami/elasticsearch/data'
+            - 'elasticsearch_conf:/opt/bitnami/elasticsearch/config/'
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 5
+                window: 120s
+        ports:
+            - '9200:9200'
+        healthcheck:
+            test: curl -s -k https://elasticsearch:9200 >/dev/null || exit 1
+            interval: 30s
+            timeout: 10s
+            retries: 5
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+            nofile:
+                soft: 200000
+                hard: 200000
+        networks:
+            - nginx_proxy_nw
+
+    kibana:
+        hostname: kibana
+        image: maverick0809/bitnami_kibana_tls:8.15.3v1
+        user: '1001:1001'
+        restart: unless-stopped
+        environment:
+            CONFIG_DIR: /opt/bitnami/kibana/config
+            ENCRYPTION_KEY: ${XPACK_ENCRYPTION_KEY}
+            KIBANA_ELASTICSEARCH_URL: 'https://elasticsearch:9200'
+            KIBANA_URL: https://0.0.0.0:5601
+            KIBANA_HOST: 0.0.0.0
+            KIBANA_PORT_NUMBER: 5601
+            ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+            ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+        volumes:
+            - '/mnt/efk-data/kibana:/opt/bitnami/kibana/data'
+            - 'kibana_conf:/opt/bitnami/kibana/config'
+        healthcheck:
+            test: curl -s -k https://kibana:5601 >/dev/null || exit 1
+            interval: 30s
+            timeout: 10s
+            retries: 5
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 5
+                window: 120s
+        ports:
+            - '5601:5601'
+        networks:
+            - nginx_proxy_nw
+        depends_on:
+            - elasticsearch
+
+    fluentd:
+        image: maverick0809/bitnami_fluentd_tls_1.17.1:191224 #maverick0809/bitnami_fluentd_tls_1.17.1:v1 #maverick0809/bitnami_fluentd_tls:1.17.1v1
+        user: '1001:1001'
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 5
+                window: 120s
+        ports:
+            - '24224:24224'
+        environment:
+            ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+            ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+            ELASTIC_HOST: ${ELASTIC_HOST}
+            FLUENTD_USER: ${FLUENTD_USER}
+            FLUENTD_PASSWORD: ${FLUENTD_PASSWORD}
+            ELASTIC_URL: 'https://${ELASTIC_HOST}:9200' 
+            FLUENTD_LOG_LEVEL: ${FLUENTD_LOG_LEVEL}
+            SHARED_KEY: ${SHARED_KEY}
+            SELF_HOSTNAME: 203.29.17.166
+            FLUENTD_FLUSH_THREAD_COUNT: ${FLUENTD_FLUSH_THREAD_COUNT}
+            FLUENTD_CHUNK_LIMIT_SIZE: ${FLUENTD_CHUNK_LIMIT_SIZE}
+            FLUENTD_QUEUED_CHUNKS_LIMIT_SIZE: ${FLUENTD_QUEUED_CHUNKS_LIMIT_SIZE}
+            FLUENTD_TOTAL_LIMIT_SIZE: ${FLUENTD_TOTAL_LIMIT_SIZE}
+        volumes:
+            - fluentd-buffer:/opt/bitnami/fluentd/buffer
+        depends_on:
+            - elasticsearch
+        networks:
+            - nginx_proxy_nw
+
+networks:
+    nginx_proxy_nw:
+
+volumes:
+    elasticsearch_conf:
+        driver: local
+    fluentd_conf:
+        driver: local
+    fluentd-buffer:
+        driver: local
+    kibana_conf:
+        driver: local
